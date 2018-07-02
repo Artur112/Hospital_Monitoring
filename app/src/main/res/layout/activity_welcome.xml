@@ -24,12 +24,11 @@
             android:id="@+id/imageView3"
             android:layout_width="@dimen/_180sdp"
             android:layout_height="@dimen/_180sdp"
-            android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
-            android:scaleType="fitCenter"
-            android:src="@drawable/socket"
+            android:layout_centerVertical="true"
             android:onClick="clickanywhere"
-            />
+            android:scaleType="fitCenter"
+            android:src="@drawable/socket" />
 
         <TextView
             android:id="@+id/textView4"

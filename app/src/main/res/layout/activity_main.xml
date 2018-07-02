@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/gradient"
     tools:context="com.extcord.jg3215.ecc.MainActivity">
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,11 +18,83 @@
         app:layout_constraintVertical_bias="0.0">
 
         <TextView
+            android:id="@+id/textViewgreen"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView5"
+            android:layout_alignTop="@+id/seekBar2"
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/textVieworange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView5"
+            android:layout_alignTop="@+id/seekBar3"
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/textViewred"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView5"
+            android:layout_alignTop="@+id/seekBar"
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="106dp"
+            android:text="Drag to change limits:"
+            android:textSize="20sp" />
+
+        <SeekBar
+            android:id="@+id/seekBar3"
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/textView5"
+            android:layout_marginBottom="50dp"
+            android:background="@android:color/holo_orange_dark" />
+
+        <SeekBar
+            android:id="@+id/seekBar2"
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/textView5"
+            android:layout_marginBottom="80dp"
+            android:background="@android:color/holo_green_dark" />
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="210dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/textView5"
+            android:layout_marginBottom="18dp"
+            android:background="@android:color/holo_red_dark" />
+
+        <TextView
+            android:id="@+id/textView5"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/_256sdp"
+            android:layout_marginTop="39dp"
+            android:layout_weight="1"
+            android:text="Choose a paired extension cord:"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="216dp"
             android:text="The chosen extender \ncord's temperature is:"
             android:textColor="#FFF"
             android:textSize="@dimen/_20ssp" />
@@ -29,9 +102,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/_320sdp"
+            android:layout_marginBottom="152dp"
             android:text="xx ºC"
             android:textColor="#FFF"
             android:textSize="@dimen/_32ssp" />
@@ -39,12 +112,13 @@
         <ListView
             android:id="@+id/devicesListView"
             android:layout_width="@dimen/_280sdp"
-            android:layout_height="@dimen/_200sdp"
+            android:layout_height="201dp"
+            android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/_36ssp"
+            android:layout_marginTop="80dp"
             android:choiceMode="singleChoice"
-            android:textColor="#FFF"/>
+            android:textColor="#FFF" />
 
-   </RelativeLayout>
+    </RelativeLayout>
 
 </LinearLayout>
