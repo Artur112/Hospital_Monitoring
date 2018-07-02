@@ -29,7 +29,7 @@ public class BluetoothService extends Service {
     private BluetoothSocket mBTSocket = null; // bi-directional client-to-client data path
     private BluetoothAdapter mBTAdapter;
 
-    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
+    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier - needs to be changed
 
     // #defines for identifying shared types between calling functions
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
