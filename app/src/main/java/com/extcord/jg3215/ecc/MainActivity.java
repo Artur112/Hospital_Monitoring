@@ -21,12 +21,17 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
     // GUI Components
     private TextView mBluetoothStatus;
     private TextView mReadBuffer;
+
     private BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
@@ -65,6 +71,102 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SeekBar GreenSeekBar = findViewById(R.id.seekBarGreen);
+        SeekBar OrangeSeekBar = findViewById(R.id.seekBarOrange);
+        SeekBar RedSeekBar = findViewById(R.id.seekBarRed);
+        TextView textViewGreen = findViewById(R.id.textViewgreen);
+        TextView textViewOrange = findViewById(R.id.textVieworange);
+        TextView textViewRed = findViewById(R.id.textViewred);
+        textViewGreen.setText(Integer.toString(GreenSeekBar.getProgress())+ " mA");
+        textViewOrange.setText(Integer.toString(OrangeSeekBar.getProgress())+ " mA");
+        textViewRed.setText(Integer.toString(RedSeekBar.getProgress())+ " mA");
+        GreenSeekBar.setMax(150);
+        RedSeekBar.setMax(150);
+        OrangeSeekBar.setMax(150);
+
+        GreenSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChangedValue = 0;
+            TextView textViewGreen = findViewById(R.id.textViewgreen);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChangedValue = progress;
+                String temp = Integer.toString(progressChangedValue) + " mA";
+                textViewGreen.setText(temp);
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                String temp = Integer.toString(progressChangedValue) + " mA";
+                textViewGreen.setText(temp);
+            }
+        });
+
+        OrangeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChangedValue = 0;
+            TextView textViewOrange = findViewById(R.id.textVieworange);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChangedValue = progress;
+                String temp = Integer.toString(progressChangedValue) + " mA";
+                textViewOrange.setText(temp);
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                String temp = Integer.toString(progressChangedValue) + " mA";
+                textViewOrange.setText(temp);
+            }
+        });
+
+        RedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChangedValue = 0;
+            TextView textViewRed = findViewById(R.id.textViewred);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChangedValue = progress;
+                String temp = Integer.toString(progressChangedValue) + " mA";
+                textViewRed.setText(temp);
+            }
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                String temp = Integer.toString(progressChangedValue) + " mA";
+                textViewRed.setText(temp);
+            }
+        });
+
+        final Button btnOpenPopup = (Button)findViewById(R.id.modifylimits);
+        btnOpenPopup.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View arg0) {
+                LayoutInflater layoutInflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+                View popupView = layoutInflater.inflate(R.layout.modifypopupwindow, null);
+                final PopupWindow popupWindow = new PopupWindow(
+                        popupView,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+
+                Button btnOK = popupView.findViewById(R.id.ok);
+                btnOK.setOnClickListener(new Button.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        popupWindow.dismiss();
+                    }});
+
+                Button btnDismiss = popupView.findViewById(R.id.cancel);
+                btnDismiss.setOnClickListener(new Button.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        popupWindow.dismiss();
+                    }});
+
+                popupWindow.showAtLocation(arg0, Gravity.CENTER, 0, 0);
+            }
+        });
+
 
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
