@@ -20,6 +20,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -65,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
     private final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
     private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View arg0) {
                 LayoutInflater layoutInflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-                View popupView = layoutInflater.inflate(R.layout.modifypopupwindow, null);
+                final View popupView = layoutInflater.inflate(R.layout.modifypopupwindow, null);
                 final PopupWindow popupWindow = new PopupWindow(
                         popupView,
                         RelativeLayout.LayoutParams.WRAP_CONTENT,
@@ -151,7 +152,34 @@ public class MainActivity extends AppCompatActivity {
                 btnOK.setOnClickListener(new Button.OnClickListener(){
                     @Override
                     public void onClick(View v) {
-                        // TODO Auto-generated method stub
+                        EditText greenMin = popupView.findViewById(R.id.greenmin);
+                        EditText greenMax = popupView.findViewById(R.id.greenmax);
+                        EditText orangeMin = popupView.findViewById(R.id.orangemin);
+                        EditText orangeMax = popupView.findViewById(R.id.orangemax);
+                        EditText redMin = popupView.findViewById(R.id.redmin);
+                        EditText redMax = popupView.findViewById(R.id.redmax);
+                        SeekBar GreenSeekBar = findViewById(R.id.seekBarGreen);
+                        SeekBar OrangeSeekBar = findViewById(R.id.seekBarOrange);
+                        SeekBar RedSeekBar = findViewById(R.id.seekBarRed);
+
+                        if(!greenMin.getText().toString().isEmpty()){
+                            GreenSeekBar.setMin(Integer.parseInt(greenMin.getText().toString()));
+                        }
+                        if(!greenMax.getText().toString().isEmpty()){
+                           GreenSeekBar.setMax(Integer.parseInt(greenMax.getText().toString()));
+                        }
+                        if(!orangeMin.getText().toString().isEmpty()){
+                            OrangeSeekBar.setMin(Integer.parseInt(orangeMin.getText().toString()));
+                        }
+                        if(!orangeMax.getText().toString().isEmpty()){
+                            OrangeSeekBar.setMax(Integer.parseInt(orangeMax.getText().toString()));
+                        }
+                        if(!redMin.getText().toString().isEmpty()){
+                            RedSeekBar.setMin(Integer.parseInt(redMin.getText().toString()));
+                        }
+                        if(!redMax.getText().toString().isEmpty()){
+                            RedSeekBar.setMax(Integer.parseInt(redMax.getText().toString()));
+                        }
                         popupWindow.dismiss();
                     }});
 
@@ -163,6 +191,8 @@ public class MainActivity extends AppCompatActivity {
                         popupWindow.dismiss();
                     }});
 
+                popupWindow.setFocusable(true);
+                popupWindow.update();
                 popupWindow.showAtLocation(arg0, Gravity.CENTER, 0, 0);
             }
         });
@@ -243,6 +273,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void modifylimits(View arg0){
+
+
+    }
     // Enter here after user selects "yes" or "no" to enabling radio
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent Data){
