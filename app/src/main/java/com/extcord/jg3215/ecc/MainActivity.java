@@ -14,34 +14,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.SystemClock;
+import android.graphics.Color;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -50,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
     // GUI Components
     private TextView mBluetoothStatus;
     private TextView mReadBuffer;
+    private TextView CurrentTextView;
+    private int GreenThreshold = 0;
+    private int OrangeThreshold = 0;
+    private int RedThreshold = 0;
 
     private BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
@@ -57,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     private ListView mDevicesListView;
 
     private final String TAG = MainActivity.class.getSimpleName();
-    private Handler mHandler; // Our main handler that will receive callback notifications
     private ConnectedThread mConnectedThread; // bluetooth background worker thread to send and receive data
     private BluetoothSocket mBTSocket = null; // bi-directional client-to-client data path
 
@@ -65,138 +61,35 @@ public class MainActivity extends AppCompatActivity {
 
     // #defines for identifying shared types between calling functions
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
-    private final static int MESSAGE_READ = 2; // used in bluetooth handler to identify message update
-    private final static int CONNECTING_STATUS = 3; // used in bluetooth handler to identify message status
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SeekBar GreenSeekBar = findViewById(R.id.seekBarGreen);
-        SeekBar OrangeSeekBar = findViewById(R.id.seekBarOrange);
-        SeekBar RedSeekBar = findViewById(R.id.seekBarRed);
-        TextView textViewGreen = findViewById(R.id.textViewgreen);
-        TextView textViewOrange = findViewById(R.id.textVieworange);
-        TextView textViewRed = findViewById(R.id.textViewred);
-        textViewGreen.setText(Integer.toString(GreenSeekBar.getProgress())+ " mA");
-        textViewOrange.setText(Integer.toString(OrangeSeekBar.getProgress())+ " mA");
-        textViewRed.setText(Integer.toString(RedSeekBar.getProgress())+ " mA");
-        GreenSeekBar.setMax(150);
-        RedSeekBar.setMax(150);
-        OrangeSeekBar.setMax(150);
+        CurrentTextView = (TextView) findViewById(R.id.CurrentTextView);
+        File directory = getExternalFilesDir("/");
+        File file = new File(directory,"Thresholds.txt");
 
-        GreenSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressChangedValue = 0;
-            TextView textViewGreen = findViewById(R.id.textViewgreen);
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChangedValue = progress;
-                String temp = Integer.toString(progressChangedValue) + " mA";
-                textViewGreen.setText(temp);
+        try {
+            if(file.length()!=0) {
+                FileReader fileReader = new FileReader(file);
+                // Always wrap FileReader in BufferedReader.
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
+                GreenThreshold = Integer.parseInt(bufferedReader.readLine());
+                OrangeThreshold = Integer.parseInt(bufferedReader.readLine());
+                RedThreshold = Integer.parseInt(bufferedReader.readLine());
+                bufferedReader.close(); //Closes file.
+                //Toast.makeText(getBaseContext(), Integer.toString(GreenThreshold) + "  "+ Integer.toString(OrangeThreshold) +"  " + Integer.toString(RedThreshold), Toast.LENGTH_SHORT).show();
+            }else{
+                GreenThreshold = 150;
+                OrangeThreshold = 150;
+                RedThreshold = 150;
+               // Toast.makeText(getBaseContext(), Integer.toString(GreenThreshold) + "  "+ Integer.toString(OrangeThreshold) +"  " + Integer.toString(RedThreshold), Toast.LENGTH_SHORT).show();
             }
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                String temp = Integer.toString(progressChangedValue) + " mA";
-                textViewGreen.setText(temp);
-            }
-        });
-
-        OrangeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressChangedValue = 0;
-            TextView textViewOrange = findViewById(R.id.textVieworange);
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChangedValue = progress;
-                String temp = Integer.toString(progressChangedValue) + " mA";
-                textViewOrange.setText(temp);
-            }
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                String temp = Integer.toString(progressChangedValue) + " mA";
-                textViewOrange.setText(temp);
-            }
-        });
-
-        RedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressChangedValue = 0;
-            TextView textViewRed = findViewById(R.id.textViewred);
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChangedValue = progress;
-                String temp = Integer.toString(progressChangedValue) + " mA";
-                textViewRed.setText(temp);
-            }
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                String temp = Integer.toString(progressChangedValue) + " mA";
-                textViewRed.setText(temp);
-            }
-        });
-
-        final Button btnOpenPopup = (Button)findViewById(R.id.modifylimits);
-        btnOpenPopup.setOnClickListener(new Button.OnClickListener(){
-            @Override
-            public void onClick(View arg0) {
-                LayoutInflater layoutInflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
-                final View popupView = layoutInflater.inflate(R.layout.modifypopupwindow, null);
-                final PopupWindow popupWindow = new PopupWindow(
-                        popupView,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-                Button btnOK = popupView.findViewById(R.id.ok);
-                btnOK.setOnClickListener(new Button.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        EditText greenMin = popupView.findViewById(R.id.greenmin);
-                        EditText greenMax = popupView.findViewById(R.id.greenmax);
-                        EditText orangeMin = popupView.findViewById(R.id.orangemin);
-                        EditText orangeMax = popupView.findViewById(R.id.orangemax);
-                        EditText redMin = popupView.findViewById(R.id.redmin);
-                        EditText redMax = popupView.findViewById(R.id.redmax);
-                        SeekBar GreenSeekBar = findViewById(R.id.seekBarGreen);
-                        SeekBar OrangeSeekBar = findViewById(R.id.seekBarOrange);
-                        SeekBar RedSeekBar = findViewById(R.id.seekBarRed);
-
-                        if(!greenMin.getText().toString().isEmpty()){
-                            GreenSeekBar.setMin(Integer.parseInt(greenMin.getText().toString()));
-                        }
-                        if(!greenMax.getText().toString().isEmpty()){
-                           GreenSeekBar.setMax(Integer.parseInt(greenMax.getText().toString()));
-                        }
-                        if(!orangeMin.getText().toString().isEmpty()){
-                            OrangeSeekBar.setMin(Integer.parseInt(orangeMin.getText().toString()));
-                        }
-                        if(!orangeMax.getText().toString().isEmpty()){
-                            OrangeSeekBar.setMax(Integer.parseInt(orangeMax.getText().toString()));
-                        }
-                        if(!redMin.getText().toString().isEmpty()){
-                            RedSeekBar.setMin(Integer.parseInt(redMin.getText().toString()));
-                        }
-                        if(!redMax.getText().toString().isEmpty()){
-                            RedSeekBar.setMax(Integer.parseInt(redMax.getText().toString()));
-                        }
-                        popupWindow.dismiss();
-                    }});
-
-                Button btnDismiss = popupView.findViewById(R.id.cancel);
-                btnDismiss.setOnClickListener(new Button.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        // TODO Auto-generated method stub
-                        popupWindow.dismiss();
-                    }});
-
-                popupWindow.setFocusable(true);
-                popupWindow.update();
-                popupWindow.showAtLocation(arg0, Gravity.CENTER, 0, 0);
-            }
-        });
-
+        }catch (IOException e) {
+            Toast.makeText(getBaseContext(), "Failed to read Thresholds", Toast.LENGTH_SHORT).show();
+        }
 
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
@@ -222,33 +115,11 @@ public class MainActivity extends AppCompatActivity {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
 
-
-        mHandler = new Handler(){
-            public void handleMessage(android.os.Message msg){
-                if(msg.what == MESSAGE_READ){
-                    String readMessage = null;
-                    try {
-                        readMessage = new String((byte[]) msg.obj, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                 //   mReadBuffer.setText(readMessage);
-                }
-
-                if(msg.what == CONNECTING_STATUS){
-                    if(msg.arg1 == 1)
-                        Toast.makeText(getApplicationContext(),"Connected to device",Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(getApplicationContext(),"Connection Failed",Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-
         if (mBTArrayAdapter == null) {
             // Device does not support Bluetooth
             Toast.makeText(getApplicationContext(),"Bluetooth device not found!",Toast.LENGTH_SHORT).show();
         }
-        else {
+       // else {
         /*    mScanBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -270,13 +141,14 @@ public class MainActivity extends AppCompatActivity {
                     discover(v);
                 }
             }); */
-        }
+       // }
     }
 
-    public void modifylimits(View arg0){
-
-
+    public void editThresholds(View v){
+        Intent intent = new Intent(getApplicationContext(), ThresholdActivity.class);
+        startActivity(intent);
     }
+
     // Enter here after user selects "yes" or "no" to enabling radio
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent Data){
@@ -370,8 +242,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             fail = true;
                             mBTSocket.close();
-                            mHandler.obtainMessage(CONNECTING_STATUS, -1, -1)
-                                    .sendToTarget();
+                            Toast.makeText(getApplicationContext(),"Connection Failed",Toast.LENGTH_SHORT).show();
                         } catch (IOException e2) {
                             //insert code to deal with this
                             Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
@@ -380,9 +251,7 @@ public class MainActivity extends AppCompatActivity {
                     if(fail == false) {
                         mConnectedThread = new ConnectedThread(mBTSocket);
                         mConnectedThread.start();
-
-                        mHandler.obtainMessage(CONNECTING_STATUS, 1, -1, name)
-                                .sendToTarget();
+                        Toast.makeText(getApplicationContext(),"Connected to device",Toast.LENGTH_SHORT).show();
                     }
                 }
             }.start();
@@ -405,6 +274,9 @@ public class MainActivity extends AppCompatActivity {
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket) {
+            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver,
+                    new IntentFilter("ThresholdChanged"));
+
             mmSocket = socket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
@@ -420,21 +292,51 @@ public class MainActivity extends AppCompatActivity {
             mmOutStream = tmpOut;
         }
 
+        private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                write("T");
+                String newThreshold = intent.getExtras().getString("Threshold");
+                write(newThreshold);
+            }
+        };
+
         public void run() {
-            byte[] buffer = new byte[1024];  // buffer store for the stream
+            byte[] buffer = new byte[1];  // buffer store for the stream
             int bytes; // bytes returned from read()
+            String Currentstring = null;
             // Keep listening to the InputStream until an exception occurs
             while (true) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.available();
+                    bytes = mmInStream.read(buffer);
                     if(bytes != 0) {
-                        buffer = new byte[1024];
-                        SystemClock.sleep(100); //pause and wait for rest of data. Adjust this depending on your sending speed.
-                        bytes = mmInStream.available(); // how many bytes are ready to be read?
-                        bytes = mmInStream.read(buffer, 0, bytes); // record how many bytes we actually read
-                        mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-                                .sendToTarget(); // Send the obtained bytes to the UI activity
+                        final String strReceived = new String(buffer, 0, bytes);
+                        // SystemClock.sleep(100); //pause and wait for rest of data. Adjust this depending on your sending speed.
+                        if(!Objects.equals(strReceived,"#")){
+                            if(!Objects.equals(strReceived,"S")){
+                                Currentstring = Currentstring + strReceived;
+                            }//else{
+                                //Do someth
+                           // }
+                        }else {
+                            String toprint = Currentstring + " mA";
+                            CurrentTextView.setText(toprint);
+                            int current = Integer.parseInt(Currentstring);
+                            if (current < GreenThreshold){
+                                CurrentTextView.setTextColor(Color.GREEN);
+                            }
+                            else if (current >= GreenThreshold && current < OrangeThreshold){
+                                CurrentTextView.setTextColor(Color.rgb(255,165,0));
+                            }
+                            else if(current >= OrangeThreshold && current < RedThreshold){
+                                CurrentTextView.setTextColor(Color.RED);
+                            }
+                            else if(current > RedThreshold){
+                                CurrentTextView.setText("Power Shut DOWN !");
+                                write("S");
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

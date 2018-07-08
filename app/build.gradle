@@ -28,6 +28,4 @@ dependencies {
     compile 'com.intuit.ssp:ssp-android:1.0.5'
     compile 'com.intuit.sdp:sdp-android:1.0.5'
     compile 'com.android.support:support-annotations:27.1.1'
-
-
 }

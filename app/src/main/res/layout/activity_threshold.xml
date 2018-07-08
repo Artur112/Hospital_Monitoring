@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient"
+    android:orientation="vertical"
+    tools:context="com.extcord.jg3215.ecc.ThresholdActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="98dp">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/seekBarGreen"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="62dp"
+            android:text="Drag to change thresholds:"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="27sp"
+            android:textStyle="bold" />
+
+        <SeekBar
+            android:id="@+id/seekBarGreen"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/textViewgreen"
+            android:background="@android:color/holo_orange_dark"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:progress="50" />
+
+        <TextView
+            android:id="@+id/textViewgreen"
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/seekBarGreen"
+            android:layout_marginEnd="59dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="15dp"
+            android:text="150 mA" />
+
+        <SeekBar
+            android:id="@+id/seekBarOrange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/seekBarGreen"
+            android:layout_alignStart="@+id/seekBarGreen"
+            android:layout_below="@+id/seekBarGreen"
+            android:layout_marginTop="36dp"
+            android:background="@android:color/holo_red_dark"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:progress="50" />
+
+        <TextView
+            android:id="@+id/textVieworange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/seekBarOrange"
+            android:layout_toEndOf="@+id/seekBarOrange"
+            android:paddingLeft="10dp"
+            android:paddingRight="15dp"
+            android:text="TextView" />
+
+        <SeekBar
+            android:id="@+id/seekBarRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@+id/seekBarOrange"
+            android:layout_below="@+id/seekBarOrange"
+            android:layout_marginTop="40dp"
+            android:layout_toStartOf="@+id/textVieworange"
+            android:background="@android:color/black"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:progress="50" />
+
+        <TextView
+            android:id="@+id/textViewred"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/seekBarRed"
+            android:layout_toEndOf="@+id/seekBarRed"
+            android:paddingLeft="10dp"
+            android:paddingRight="15dp"
+            android:text="TextView" />
+
+        <Button
+            android:id="@+id/modifylimits"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewred"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="70dp"
+            android:background="@android:color/holo_blue_light"
+            android:onClick="modifylimits"
+            android:text="Modify draggable limits"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/textView13"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/seekBarGreen"
+            android:layout_alignStart="@+id/seekBarGreen"
+            android:text="Orange Level Threshold (mA):"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/textView14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/textVieworange"
+            android:layout_alignStart="@+id/seekBarOrange"
+            android:text="Red Level Threshold (mA):"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/textView15"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/textViewred"
+            android:layout_alignStart="@+id/seekBarRed"
+            android:text="Power Cutout Threshold (mA):"
+            android:textColor="@android:color/white" />
+
+    </RelativeLayout>
+
+</LinearLayout>
