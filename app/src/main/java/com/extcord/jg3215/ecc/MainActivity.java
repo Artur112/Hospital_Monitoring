@@ -348,11 +348,7 @@ public class MainActivity extends AppCompatActivity {
                         final String strReceived = new String(buffer, 0, bytes);
                         // SystemClock.sleep(100); //pause and wait for rest of data. Adjust this depending on your sending speed.
                         if(!Objects.equals(strReceived,"#")){
-                            if(!Objects.equals(strReceived,"S")){
-                                Currentstring = Currentstring + strReceived;
-                            }//else{
-                                //Do someth
-                           // }
+                            Currentstring = Currentstring + strReceived;
                         }else {
                             String toprint = Currentstring + " mA";
                             CurrentTextView.setText(toprint);
@@ -369,6 +365,7 @@ public class MainActivity extends AppCompatActivity {
                             else if(current > RedThreshold){
                                 CurrentTextView.setText("Power Shut DOWN !");
                             }
+                            Currentstring = null;
                         }
                     }
                 } catch (IOException e) {
