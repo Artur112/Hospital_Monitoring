@@ -368,7 +368,6 @@ public class MainActivity extends AppCompatActivity {
                             }
                             else if(current > RedThreshold){
                                 CurrentTextView.setText("Power Shut DOWN !");
-                                write("S");
                             }
                         }
                     }
