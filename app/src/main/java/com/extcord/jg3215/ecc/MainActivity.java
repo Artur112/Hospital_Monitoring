@@ -15,6 +15,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -176,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void discover(View view){
+  /*  private void discover(View view){
         // Check if the device is already discovering
         if(mBTAdapter.isDiscovering()){
             mBTAdapter.cancelDiscovery();
@@ -193,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
             }
         }
-    }
+    } */
 
     final BroadcastReceiver blReceiver = new BroadcastReceiver() {
         @Override
@@ -242,21 +244,31 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             fail = true;
                             mBTSocket.close();
-                            Toast.makeText(getApplicationContext(),"Connection Failed",Toast.LENGTH_SHORT).show();
+                            toastAnywhere("Connection Failed");
                         } catch (IOException e2) {
                             //insert code to deal with this
                             Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
                         }
                     }
-                    if(fail == false) {
+                    if(!fail) {
                         mConnectedThread = new ConnectedThread(mBTSocket);
                         mConnectedThread.start();
-                        Toast.makeText(getApplicationContext(),"Connected to device",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getBaseContext(),"Connected to device",Toast.LENGTH_SHORT).show();
                     }
                 }
             }.start();
         }
     };
+
+    public void toastAnywhere(final String text) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            public void run() {
+                Toast.makeText( getApplicationContext(), text,
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
         try {
