@@ -286,8 +286,12 @@ public class MainActivity extends AppCompatActivity {
         private final OutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket) {
-            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver,
-                    new IntentFilter("ThresholdChanged"));
+            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver1,
+                    new IntentFilter("OrangeThresholdChanged"));
+            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver2,
+                    new IntentFilter("RedThresholdChanged"));
+            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver3,
+                    new IntentFilter("PowerThresholdChanged"));
 
             mmSocket = socket;
             InputStream tmpIn = null;
@@ -304,12 +308,30 @@ public class MainActivity extends AppCompatActivity {
             mmOutStream = tmpOut;
         }
 
-        private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        private BroadcastReceiver mMessageReceiver1 = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                write("T");
                 String newThreshold = intent.getExtras().getString("Threshold");
                 write(newThreshold);
+                write("O");
+            }
+        };
+
+        private BroadcastReceiver mMessageReceiver2 = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String newThreshold = intent.getExtras().getString("Threshold");
+                write(newThreshold);
+                write("R");
+            }
+        };
+
+        private BroadcastReceiver mMessageReceiver3 = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String newThreshold = intent.getExtras().getString("Threshold");
+                write(newThreshold);
+                write("P");
             }
         };
 

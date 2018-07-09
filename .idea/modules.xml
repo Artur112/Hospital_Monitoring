@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\artur\Downloads\SaveReadWriteDeleteSQLite-master\SaveReadWriteDeleteSQLite-master\ecc\app\app.iml" filepath="C:\Users\artur\Downloads\SaveReadWriteDeleteSQLite-master\SaveReadWriteDeleteSQLite-master\ecc\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/ecc.iml" filepath="$PROJECT_DIR$/ecc.iml" />
-      <module fileurl="file://C:\Users\artur\Downloads\SaveReadWriteDeleteSQLite-master\SaveReadWriteDeleteSQLite-master\ecc\ecc.iml" filepath="C:\Users\artur\Downloads\SaveReadWriteDeleteSQLite-master\SaveReadWriteDeleteSQLite-master\ecc\ecc.iml" />
     </modules>
   </component>
 </project>

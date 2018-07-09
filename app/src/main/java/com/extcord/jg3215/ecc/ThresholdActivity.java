@@ -136,6 +136,7 @@ public class ThresholdActivity extends AppCompatActivity {
                     outstream.write(Integer.toString(OrangeProgress)+"\n");
                     outstream.write(Integer.toString(RedProgress));
                     outstream.close();
+                    sendOrangeThreshold(Integer.toString(progressChangedValue));
 
                 }catch (IOException e) {
 
@@ -166,6 +167,7 @@ public class ThresholdActivity extends AppCompatActivity {
                     outstream.write(Integer.toString(progressChangedValue)+"\n");
                     outstream.write(Integer.toString(RedProgress));
                     outstream.close();
+                    sendRedThreshold(Integer.toString(progressChangedValue));
 
                 }catch (IOException e) {
 
@@ -196,7 +198,7 @@ public class ThresholdActivity extends AppCompatActivity {
                     outstream.write(Integer.toString(OrangeProgress)+"\n");
                     outstream.write(Integer.toString(progressChangedValue));
                     outstream.close();
-                    sendThreshold(Integer.toString(progressChangedValue));
+                    sendPowerThreshold(Integer.toString(progressChangedValue));
                 }catch (IOException e) {
 
                 }
@@ -286,8 +288,20 @@ public class ThresholdActivity extends AppCompatActivity {
         });
     }
 
-    private void sendThreshold(String threshold){
-        Intent intent = new Intent("ThresholdChanged");
+    private void sendOrangeThreshold(String threshold){
+        Intent intent = new Intent("OrangeThresholdChanged");
+        intent.putExtra("Threshold", threshold);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void sendRedThreshold(String threshold){
+        Intent intent = new Intent("RedThresholdChanged");
+        intent.putExtra("Threshold", threshold);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    private void sendPowerThreshold(String threshold){
+        Intent intent = new Intent("PowerThresholdChanged");
         intent.putExtra("Threshold", threshold);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
