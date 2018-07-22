@@ -23,15 +23,22 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mBluetoothStatus;
     private TextView mReadBuffer;
     private TextView CurrentTextView;
+    private TextView warningmessage;
     private int GreenThreshold = 0;
     private int OrangeThreshold = 0;
     private int RedThreshold = 0;
@@ -54,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private Set<BluetoothDevice> mPairedDevices;
     private ArrayAdapter<String> mBTArrayAdapter;
     private ListView mDevicesListView;
+    private PopupWindow popupWindow;
 
     private final String TAG = MainActivity.class.getSimpleName();
     private ConnectedThread mConnectedThread; // bluetooth background worker thread to send and receive data
@@ -69,7 +78,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        CurrentTextView = (TextView) findViewById(R.id.CurrentTextView);
+        CurrentTextView = findViewById(R.id.CurrentTextView);
+        warningmessage = findViewById(R.id.warningmessage);
+        mBluetoothStatus = findViewById(R.id.mBluetoothStatus);
+
         File directory = getExternalFilesDir("/");
         File file = new File(directory,"Thresholds.txt");
 
@@ -84,9 +96,9 @@ public class MainActivity extends AppCompatActivity {
                 bufferedReader.close(); //Closes file.
                 //Toast.makeText(getBaseContext(), Integer.toString(GreenThreshold) + "  "+ Integer.toString(OrangeThreshold) +"  " + Integer.toString(RedThreshold), Toast.LENGTH_SHORT).show();
             }else{
-                GreenThreshold = 150;
-                OrangeThreshold = 150;
-                RedThreshold = 150;
+                GreenThreshold = 5;
+                OrangeThreshold = 10;
+                RedThreshold = 15;
                // Toast.makeText(getBaseContext(), Integer.toString(GreenThreshold) + "  "+ Integer.toString(OrangeThreshold) +"  " + Integer.toString(RedThreshold), Toast.LENGTH_SHORT).show();
             }
         }catch (IOException e) {
@@ -108,10 +120,6 @@ public class MainActivity extends AppCompatActivity {
             for (BluetoothDevice device : mPairedDevices)
                 mBTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
         }
-
-        mDevicesListView = findViewById(R.id.devicesListView);
-        mDevicesListView.setAdapter(mBTArrayAdapter); // assign model to view
-        mDevicesListView.setOnItemClickListener(mDeviceClickListener);
 
         // Ask for location permission if not already allowed
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -144,6 +152,43 @@ public class MainActivity extends AppCompatActivity {
                 }
             }); */
        // }
+
+        final Button btnOpenPopup = findViewById(R.id.connectbutton);
+        btnOpenPopup.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View arg0) {
+                LayoutInflater layoutInflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+                final View popupView = layoutInflater.inflate(R.layout.choosechord, null);
+                        popupWindow = new PopupWindow(
+                        popupView,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+                
+                mDevicesListView = popupView.findViewById(R.id.devicesListView);
+                mDevicesListView.setAdapter(mBTArrayAdapter); // assign model to view
+                mDevicesListView.setOnItemClickListener(mDeviceClickListener);
+
+                Button btnDismiss = popupView.findViewById(R.id.cancel);
+                btnDismiss.setOnClickListener(new Button.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        // TODO Auto-generated method stub
+                        popupWindow.dismiss();
+                    }});
+
+                popupWindow.setFocusable(true);
+                popupWindow.update();
+                popupWindow.showAtLocation(arg0, Gravity.CENTER, 0, 0);
+            }
+        });
+    }
+
+    public void discbutton(View v){
+        if (mBluetoothStatus.getText().equals("Bluetooth Status: Connected")){
+            mConnectedThread.cancel();
+            String text = "Bluetooth Status: Not Connected";
+            mBluetoothStatus.setText(text);
+        }
     }
 
     public void editThresholds(View v){
@@ -168,9 +213,6 @@ public class MainActivity extends AppCompatActivity {
                         mBTArrayAdapter.add(device.getName() + "\n" + device.getAddress());
                 }
 
-                mDevicesListView = findViewById(R.id.devicesListView);
-                mDevicesListView.setAdapter(mBTArrayAdapter); // assign model to view
-                mDevicesListView.setOnItemClickListener(mDeviceClickListener);
                 Toast.makeText(getApplicationContext(),"Bluetooth enabled",Toast.LENGTH_SHORT).show();
             }
             else
@@ -235,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                         mBTSocket = createBluetoothSocket(device);
                     } catch (IOException e) {
                         fail = true;
-                        Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
                     }
                     // Establish the Bluetooth socket connection.
                     try {
@@ -247,13 +289,17 @@ public class MainActivity extends AppCompatActivity {
                             toastAnywhere("Connection Failed");
                         } catch (IOException e2) {
                             //insert code to deal with this
-                            Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
+                           Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
                         }
                     }
                     if(!fail) {
                         mConnectedThread = new ConnectedThread(mBTSocket);
                         mConnectedThread.start();
-                        Toast.makeText(getBaseContext(),"Connected to device",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getBaseContext(),"Connected to device",Toast.LENGTH_SHORT).show();
+                        String text = "Status: Connected";
+                        mBluetoothStatus.setText(text);
+                        popupWindow.dismiss();
+
                     }
                 }
             }.start();
@@ -350,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
                         if(!Objects.equals(strReceived,"#")){
                             Currentstring = Currentstring + strReceived;
                         }else {
-                            String toprint = Currentstring + " mA";
+                            String toprint = Currentstring + " Amps";
                             CurrentTextView.setText(toprint);
                             int current = Integer.parseInt(Currentstring);
                             if (current < GreenThreshold){
@@ -363,7 +409,8 @@ public class MainActivity extends AppCompatActivity {
                                 CurrentTextView.setTextColor(Color.RED);
                             }
                             else if(current > RedThreshold){
-                                CurrentTextView.setText("Power Shut DOWN !");
+                                String text = "Power Shut DOWN !";
+                                CurrentTextView.setText(text);
                             }
                             Currentstring = null;
                         }

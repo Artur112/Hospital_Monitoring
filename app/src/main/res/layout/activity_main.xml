@@ -7,59 +7,114 @@
     android:background="@drawable/gradient"
     tools:context="com.extcord.jg3215.ecc.MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textView5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="15dp"
-            android:text="Choose a paired extension cord:"
-            android:textAlignment="center"
-            android:textSize="20sp" />
-
-        <ListView
-            android:id="@+id/devicesListView"
-            android:layout_width="match_parent"
-            android:layout_height="252dp"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:choiceMode="singleChoice"
-            android:textColor="#FFF" />
-
-        <TextView
-            android:id="@+id/Message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="The chosen extender \ncord's current is:"
-            android:textAlignment="center"
-            android:textColor="#FFF"
-            android:textSize="@dimen/_20ssp" />
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/CurrentTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/textView"
-            android:layout_centerHorizontal="true"
-            android:text="xx mA"
+            android:layout_above="@+id/warningmessage"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="49dp"
+            android:text="- Amps"
             android:textAlignment="center"
             android:textColor="#FFF"
             android:textSize="@dimen/_32ssp" />
 
-        <Button
-            android:id="@+id/button"
+        <LinearLayout
+            android:id="@+id/linearLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="editThresholds"
-            android:text="Edit Current Thresholds" />
+            android:layout_marginTop="70dp"
+            android:orientation="horizontal">
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/connectbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/editThresholds"
+                android:layout_below="@+id/mBluetoothStatus"
+                android:layout_marginLeft="75dp"
+                android:layout_marginRight="20dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:fontFamily="sans-serif"
+                android:text="Connect"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/discbutton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/connectbutton"
+                android:layout_alignBottom="@+id/connectbutton"
+                android:layout_alignEnd="@+id/mBluetoothStatus"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="75dp"
+                android:layout_weight="1"
+                android:background="@drawable/button_bg"
+                android:text="Disconnect"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/Message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/CurrentTextView"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="35dp"
+            android:text="The chosen extender \ncord's current is:"
+            android:textAlignment="center"
+            android:textColor="#FFF"
+            android:textSize="30sp" />
+
+        <Button
+            android:id="@+id/editThresholds"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="52dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginRight="60dp"
+            android:background="@drawable/button_bg"
+            android:fontFamily="sans-serif"
+            android:onClick="editThresholds"
+            android:text="Edit Current Thresholds"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/mBluetoothStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="21dp"
+            android:text="Bluetooth Status: Not Connected"
+            android:textColor="@android:color/white"
+            android:textSize="17sp" />
+
+        <TextView
+            android:id="@+id/warningmessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/editThresholds"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="70dp"
+            android:text="Here is the textbox for adding Warning Messages"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
 
 </LinearLayout>

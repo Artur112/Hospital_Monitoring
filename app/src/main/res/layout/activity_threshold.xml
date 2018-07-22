@@ -18,121 +18,123 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/seekBarGreen"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="62dp"
-            android:text="Drag to change thresholds:"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="193dp"
+            android:fontFamily="sans-serif"
+            android:text="Enter New Current Thresholds:"
             android:textAlignment="center"
             android:textColor="@android:color/white"
-            android:textSize="27sp"
-            android:textStyle="bold" />
+            android:textSize="27sp" />
 
-        <SeekBar
-            android:id="@+id/seekBarGreen"
-            android:layout_width="200dp"
+        <TableLayout
+            android:id="@+id/tableLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/textViewgreen"
-            android:background="@android:color/holo_orange_dark"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:progress="50" />
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="300dp">
 
-        <TextView
-            android:id="@+id/textViewgreen"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignTop="@+id/seekBarGreen"
-            android:layout_marginEnd="59dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="15dp"
-            android:text="150 mA" />
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
-        <SeekBar
-            android:id="@+id/seekBarOrange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignEnd="@+id/seekBarGreen"
-            android:layout_alignStart="@+id/seekBarGreen"
-            android:layout_below="@+id/seekBarGreen"
-            android:layout_marginTop="36dp"
-            android:background="@android:color/holo_red_dark"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:progress="50" />
+                <TextView
+                    android:id="@+id/textView13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignStart="@+id/textView15"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="3"
+                    android:text="Orange Threshold (A):"
+                    android:textColor="@android:color/holo_orange_dark"
+                    android:textSize="17sp" />
 
-        <TextView
-            android:id="@+id/textVieworange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/seekBarOrange"
-            android:layout_toEndOf="@+id/seekBarOrange"
-            android:paddingLeft="10dp"
-            android:paddingRight="15dp"
-            android:text="TextView" />
+                <EditText
+                    android:id="@+id/editOrange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="99"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:onClick="orangeclick"
+                    android:textAlignment="center"
+                    android:textStyle="bold" />
+            </TableRow>
 
-        <SeekBar
-            android:id="@+id/seekBarRed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignStart="@+id/seekBarOrange"
-            android:layout_below="@+id/seekBarOrange"
-            android:layout_marginTop="40dp"
-            android:layout_toStartOf="@+id/textVieworange"
-            android:background="@android:color/black"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:progress="50" />
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/textViewred"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@+id/seekBarRed"
-            android:layout_toEndOf="@+id/seekBarRed"
-            android:paddingLeft="10dp"
-            android:paddingRight="15dp"
-            android:text="TextView" />
+                <TextView
+                    android:id="@+id/textView14"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignStart="@+id/textView13"
+                    android:layout_below="@+id/textView13"
+                    android:layout_marginTop="10dp"
+                    android:text="Red Threshold (A):"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="17sp" />
+
+                <EditText
+                    android:id="@+id/editRed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="99"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:onClick="redclick"
+                    android:singleLine="true"
+                    android:textAlignment="center"
+                    android:textStyle="bold" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textView15"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/textView13"
+                    android:layout_marginTop="10dp"
+                    android:paddingRight="10dp"
+                    android:text="Power Cutout Threshold (A):"
+                    android:textColor="@android:color/black"
+                    android:textSize="17sp" />
+
+                <EditText
+                    android:id="@+id/editPower"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="99"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:onClick="powerclick"
+                    android:textAlignment="center"
+                    android:textStyle="bold" />
+            </TableRow>
+
+        </TableLayout>
 
         <Button
-            android:id="@+id/modifylimits"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/textViewred"
+            android:id="@+id/okbutton"
+            android:layout_width="130dp"
+            android:layout_height="50dp"
+            android:layout_below="@+id/tableLayout"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="70dp"
-            android:background="@android:color/holo_blue_light"
-            android:onClick="modifylimits"
-            android:text="Modify draggable limits"
-            android:textAlignment="center" />
-
-        <TextView
-            android:id="@+id/textView13"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/seekBarGreen"
-            android:layout_alignStart="@+id/seekBarGreen"
-            android:text="Orange Level Threshold (mA):"
-            android:textColor="@android:color/white" />
-
-        <TextView
-            android:id="@+id/textView14"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/textVieworange"
-            android:layout_alignStart="@+id/seekBarOrange"
-            android:text="Red Level Threshold (mA):"
-            android:textColor="@android:color/white" />
-
-        <TextView
-            android:id="@+id/textView15"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/textViewred"
-            android:layout_alignStart="@+id/seekBarRed"
-            android:text="Power Cutout Threshold (mA):"
-            android:textColor="@android:color/white" />
+            android:layout_marginTop="78dp"
+            android:background="@drawable/button_bg"
+            android:fontFamily="sans-serif"
+            android:onClick="okclick"
+            android:text="Ok"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="22sp" />
 
     </RelativeLayout>
 
