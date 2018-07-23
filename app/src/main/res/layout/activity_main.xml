@@ -57,6 +57,7 @@
                 android:layout_marginRight="75dp"
                 android:layout_weight="1"
                 android:background="@drawable/button_bg"
+                android:onClick="discbutton"
                 android:text="Disconnect"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"

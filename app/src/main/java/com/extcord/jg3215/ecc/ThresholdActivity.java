@@ -1,35 +1,22 @@
 package com.extcord.jg3215.ecc;
 
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.graphics.Typeface;
-import android.support.v4.content.IntentCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import org.w3c.dom.Text;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.util.Objects;
 
 public class ThresholdActivity extends AppCompatActivity {
 
+    //The three Current Thresholds
     private int OrangeThreshold;
     private int RedThreshold;
     private int PowerThreshold;
@@ -39,11 +26,12 @@ public class ThresholdActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_threshold);
 
+        //The three EditText fields where the user will enter values
         EditText editOrange = findViewById(R.id.editOrange);
         EditText editRed = findViewById(R.id.editRed);
         EditText editPower = findViewById(R.id.editPower);
 
-        // Reads fr
+        // Reads from file to see if any thresholds were previously saved
         File directory = getExternalFilesDir("/");
         File file = new File(directory,"Thresholds.txt");
 
@@ -51,11 +39,13 @@ public class ThresholdActivity extends AppCompatActivity {
             if(file.length()!=0){
                 FileReader fileReader = new FileReader(file);
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
+                //The three thresholds are on consecutive lines in the text file
                 OrangeThreshold = Integer.parseInt(bufferedReader.readLine());
                 RedThreshold = Integer.parseInt(bufferedReader.readLine());
                 PowerThreshold = Integer.parseInt(bufferedReader.readLine());
                 bufferedReader.close();
             }else{
+                //If no thresholds have been saved, ie never set, defaults to these options
                 OrangeThreshold = 5;
                 RedThreshold = 10;
                 PowerThreshold = 15;
@@ -64,11 +54,14 @@ public class ThresholdActivity extends AppCompatActivity {
             Toast.makeText(getBaseContext(), "Failed to read Thresholds", Toast.LENGTH_SHORT).show();
         }
 
+        //Sets the current thresholds as hint texts for the edittext fields
         editOrange.setHint(Integer.toString(OrangeThreshold));
         editRed.setHint(Integer.toString(RedThreshold));
         editPower.setHint(Integer.toString(PowerThreshold));
     }
 
+    //When the Orange Threshold edit text fiels is pressed, the new number is gotten and the new set of thresholds
+    //is saved to file
     public void orangeclick(View v)
     {
         EditText editOrange = findViewById(R.id.editOrange);
@@ -86,6 +79,8 @@ public class ThresholdActivity extends AppCompatActivity {
                 outstream.write(Integer.toString(RedThreshold)+"\n");
                 outstream.write(Integer.toString(PowerThreshold));
                 outstream.close();
+                //Function that tells the bluetooth service that the orange threshold has changed, so that it can
+                //send the new threshold to the device.
                 sendOrangeThreshold(Integer.toString(OrangeThreshold));
 
             }catch (IOException e) {
@@ -144,10 +139,14 @@ public class ThresholdActivity extends AppCompatActivity {
         }
     }
 
+    //When user presses the OK button the activity is cloesed and Main activity is shown again
     public void okclick(View v){
         ThresholdActivity.this.finish();
     }
 
+    //Functions that sends a broadcast to the broadcast receiver in the bluetooth service which listens to a
+    //change in threshold. The new threshold is passed along with the message, so the bluetooth service can
+    //send it to the device. Same functions for all the three threshold changes
     private void sendOrangeThreshold(String threshold){
         Intent intent = new Intent("OrangeThresholdChanged");
         intent.putExtra("Threshold", threshold);

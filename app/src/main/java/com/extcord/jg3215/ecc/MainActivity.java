@@ -6,6 +6,10 @@
 package com.extcord.jg3215.ecc;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -15,48 +19,37 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
     // GUI Components
+    // Bluetooth Status textbox at the top
     private TextView mBluetoothStatus;
-    private TextView mReadBuffer;
+    //The textbox that displays the Current in Amps
     private TextView CurrentTextView;
+    //The textbox that displays warning messages
     private TextView warningmessage;
-    private int GreenThreshold = 0;
-    private int OrangeThreshold = 0;
-    private int RedThreshold = 0;
 
     private BluetoothAdapter mBTAdapter;
     private Set<BluetoothDevice> mPairedDevices;
@@ -65,16 +58,16 @@ public class MainActivity extends AppCompatActivity {
     private PopupWindow popupWindow;
 
     private final String TAG = MainActivity.class.getSimpleName();
-    private ConnectedThread mConnectedThread; // bluetooth background worker thread to send and receive data
     private BluetoothSocket mBTSocket = null; // bi-directional client-to-client data path
 
-    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"); // "random" unique identifier
+    public static String deviceAddress = null;
 
     // #defines for identifying shared types between calling functions
     private final static int REQUEST_ENABLE_BT = 1; // used to identify adding bluetooth names
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Foreground.init(getApplication());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -82,28 +75,13 @@ public class MainActivity extends AppCompatActivity {
         warningmessage = findViewById(R.id.warningmessage);
         mBluetoothStatus = findViewById(R.id.mBluetoothStatus);
 
-        File directory = getExternalFilesDir("/");
-        File file = new File(directory,"Thresholds.txt");
-
-        try {
-            if(file.length()!=0) {
-                FileReader fileReader = new FileReader(file);
-                // Always wrap FileReader in BufferedReader.
-                BufferedReader bufferedReader = new BufferedReader(fileReader);
-                GreenThreshold = Integer.parseInt(bufferedReader.readLine());
-                OrangeThreshold = Integer.parseInt(bufferedReader.readLine());
-                RedThreshold = Integer.parseInt(bufferedReader.readLine());
-                bufferedReader.close(); //Closes file.
-                //Toast.makeText(getBaseContext(), Integer.toString(GreenThreshold) + "  "+ Integer.toString(OrangeThreshold) +"  " + Integer.toString(RedThreshold), Toast.LENGTH_SHORT).show();
-            }else{
-                GreenThreshold = 5;
-                OrangeThreshold = 10;
-                RedThreshold = 15;
-               // Toast.makeText(getBaseContext(), Integer.toString(GreenThreshold) + "  "+ Integer.toString(OrangeThreshold) +"  " + Integer.toString(RedThreshold), Toast.LENGTH_SHORT).show();
-            }
-        }catch (IOException e) {
-            Toast.makeText(getBaseContext(), "Failed to read Thresholds", Toast.LENGTH_SHORT).show();
-        }
+        //Registers the broadcast receivers that will be listening to Blueooth events that happen in the service,
+        LocalBroadcastManager.getInstance(this).registerReceiver(ConnectedMessageReceiver,
+                new IntentFilter("ConnectedBluetooth"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(CouldntConnectMessageReceiver,
+                new IntentFilter("CouldntConnect"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(CurrentReceivedMessageReceiver,
+                new IntentFilter("CurrentReceived"));
 
         mBTArrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
         mBTAdapter = BluetoothAdapter.getDefaultAdapter(); // get a handle on the bluetooth radio
@@ -129,29 +107,6 @@ public class MainActivity extends AppCompatActivity {
             // Device does not support Bluetooth
             Toast.makeText(getApplicationContext(),"Bluetooth device not found!",Toast.LENGTH_SHORT).show();
         }
-       // else {
-        /*    mScanBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    bluetoothOn(v);
-                }
-            }); */
-
-
-         /*   mListPairedDevicesBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v){
-                    listPairedDevices(v);
-                }
-            });
-
-            mDiscoverBtn.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v){
-                    discover(v);
-                }
-            }); */
-       // }
 
         final Button btnOpenPopup = findViewById(R.id.connectbutton);
         btnOpenPopup.setOnClickListener(new Button.OnClickListener(){
@@ -183,14 +138,73 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //When the Bluetooth connection is made, this broadcast receiver receives the message that the service
+    //sends and sets the Bluetooth Status textview accordingly. it also closes the cord selection popupwindow
+    private BroadcastReceiver ConnectedMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            TextView textView3 = findViewById(R.id.mBluetoothStatus);
+            String instr = "Bluetooth Status: Connected";
+            textView3.setText(instr);
+            popupWindow.dismiss();
+        }
+    };
+
+    //If the connection attempt fails, this receives the message from the service, says that the connection failed
+    //stops the bluetooth service.
+    private BroadcastReceiver CouldntConnectMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            stopService(new Intent(MainActivity.this, BluetoothService.class));
+        }
+    };
+
+    //When a new current is received via bluetooth in the service, the service sends the new current and
+    // the color so which range it is in in a message that this broadcast receiver listens to.
+    //This code sets the Currenttextview to the new value and accoring to what range the message says it is in
+    //it sets the color of the textview. THIS code should be edited to add what warning message should be displayed
+    // depening on what the color is.
+    private BroadcastReceiver CurrentReceivedMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String current = intent.getExtras().getString("Current");
+            String color = intent.getExtras().getString("Color");
+            String text = current + " Amps";
+            CurrentTextView.setText(text);
+
+            if(color.equals("green")){
+                CurrentTextView.setTextColor(Color.GREEN);
+            }
+            else if(color.equals("orange")){
+                CurrentTextView.setTextColor(Color.rgb(255,165,0));
+            }
+            else if(color.equals("red")){
+                CurrentTextView.setTextColor(Color.RED);
+            }
+            else if(color.equals("black")){
+                CurrentTextView.setTextColor(Color.BLACK);
+            }
+        }
+    };
+
+    //Sends message to bluetooth service to shut down the connection
+    private void DisconnectMessage() {
+        Intent intent = new Intent("DisconnectBluetooth");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    //Called when the disconnect button is pressed. Sends the message just previously described and stops
+    //the bluetooth service afterwards.
     public void discbutton(View v){
         if (mBluetoothStatus.getText().equals("Bluetooth Status: Connected")){
-            mConnectedThread.cancel();
+            DisconnectMessage();
             String text = "Bluetooth Status: Not Connected";
             mBluetoothStatus.setText(text);
+            stopService(new Intent(MainActivity.this, BluetoothService.class));
         }
     }
 
+    //Opens Threshold activity when edit thresholds button is pressed
     public void editThresholds(View v){
         Intent intent = new Intent(getApplicationContext(), ThresholdActivity.class);
         startActivity(intent);
@@ -220,25 +234,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-  /*  private void discover(View view){
-        // Check if the device is already discovering
-        if(mBTAdapter.isDiscovering()){
-            mBTAdapter.cancelDiscovery();
-            Toast.makeText(getApplicationContext(),"Discovery stopped",Toast.LENGTH_SHORT).show();
-        }
-        else{
-            if(mBTAdapter.isEnabled()) {
-                mBTArrayAdapter.clear(); // clear items
-                mBTAdapter.startDiscovery();
-                Toast.makeText(getApplicationContext(), "Discovery started", Toast.LENGTH_SHORT).show();
-                registerReceiver(blReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-            }
-            else{
-                Toast.makeText(getApplicationContext(), "Bluetooth not on", Toast.LENGTH_SHORT).show();
-            }
-        }
-    } */
-
     final BroadcastReceiver blReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -263,46 +258,12 @@ public class MainActivity extends AppCompatActivity {
             // Get the device MAC address, which is the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             final String address = info.substring(info.length() - 17);
-            final String name = info.substring(0,info.length() - 17);
-
-            // Spawn a new thread to avoid blocking the GUI one
-            new Thread()
-            {
-                public void run() {
-                    boolean fail = false;
-
-                    BluetoothDevice device = mBTAdapter.getRemoteDevice(address);
-
-                    try {
-                        mBTSocket = createBluetoothSocket(device);
-                    } catch (IOException e) {
-                        fail = true;
-                       // Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
-                    }
-                    // Establish the Bluetooth socket connection.
-                    try {
-                        mBTSocket.connect();
-                    } catch (IOException e) {
-                        try {
-                            fail = true;
-                            mBTSocket.close();
-                            toastAnywhere("Connection Failed");
-                        } catch (IOException e2) {
-                            //insert code to deal with this
-                           Toast.makeText(getBaseContext(), "Socket creation failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    if(!fail) {
-                        mConnectedThread = new ConnectedThread(mBTSocket);
-                        mConnectedThread.start();
-                        //Toast.makeText(getBaseContext(),"Connected to device",Toast.LENGTH_SHORT).show();
-                        String text = "Status: Connected";
-                        mBluetoothStatus.setText(text);
-                        popupWindow.dismiss();
-
-                    }
-                }
-            }.start();
+            deviceAddress = address;
+            if(deviceAddress != null){
+                Intent mIntent = new Intent(MainActivity.this, BluetoothService.class);
+                startService(mIntent);
+            }
+           // final String name = info.substring(0,info.length() - 17);
         }
     };
 
@@ -314,128 +275,5 @@ public class MainActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-        try {
-            final Method m = device.getClass().getMethod("createInsecureRfcommSocketToServiceRecord", UUID.class);
-            return (BluetoothSocket) m.invoke(device, BTMODULEUUID);
-        } catch (Exception e) {
-            Log.e(TAG, "Could not create Insecure RFComm Connection",e);
-        }
-        return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
-    }
-
-    private class ConnectedThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
-
-        public ConnectedThread(BluetoothSocket socket) {
-            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver1,
-                    new IntentFilter("OrangeThresholdChanged"));
-            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver2,
-                    new IntentFilter("RedThresholdChanged"));
-            LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mMessageReceiver3,
-                    new IntentFilter("PowerThresholdChanged"));
-
-            mmSocket = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
-
-            // Get the input and output streams, using temp objects because
-            // member streams are final
-            try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
-            } catch (IOException e) { }
-
-            mmInStream = tmpIn;
-            mmOutStream = tmpOut;
-        }
-
-        private BroadcastReceiver mMessageReceiver1 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String newThreshold = intent.getExtras().getString("Threshold");
-                write(newThreshold);
-                write("O");
-            }
-        };
-
-        private BroadcastReceiver mMessageReceiver2 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String newThreshold = intent.getExtras().getString("Threshold");
-                write(newThreshold);
-                write("R");
-            }
-        };
-
-        private BroadcastReceiver mMessageReceiver3 = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String newThreshold = intent.getExtras().getString("Threshold");
-                write(newThreshold);
-                write("P");
-            }
-        };
-
-        public void run() {
-            byte[] buffer = new byte[1];  // buffer store for the stream
-            int bytes; // bytes returned from read()
-            String Currentstring = null;
-            // Keep listening to the InputStream until an exception occurs
-            while (true) {
-                try {
-                    // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-                    if(bytes != 0) {
-                        final String strReceived = new String(buffer, 0, bytes);
-                        // SystemClock.sleep(100); //pause and wait for rest of data. Adjust this depending on your sending speed.
-                        if(!Objects.equals(strReceived,"#")){
-                            Currentstring = Currentstring + strReceived;
-                        }else {
-                            String toprint = Currentstring + " Amps";
-                            CurrentTextView.setText(toprint);
-                            int current = Integer.parseInt(Currentstring);
-                            if (current < GreenThreshold){
-                                CurrentTextView.setTextColor(Color.GREEN);
-                            }
-                            else if (current >= GreenThreshold && current < OrangeThreshold){
-                                CurrentTextView.setTextColor(Color.rgb(255,165,0));
-                            }
-                            else if(current >= OrangeThreshold && current < RedThreshold){
-                                CurrentTextView.setTextColor(Color.RED);
-                            }
-                            else if(current > RedThreshold){
-                                String text = "Power Shut DOWN !";
-                                CurrentTextView.setText(text);
-                            }
-                            Currentstring = null;
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-
-                    break;
-                }
-            }
-        }
-
-        /* Call this from the main activity to send data to the remote device */
-        public void write(String input) {
-            byte[] bytes = input.getBytes();           //converts entered String into bytes
-            try {
-                mmOutStream.write(bytes);
-            } catch (IOException e) { }
-        }
-
-        /* Call this from the main activity to shutdown the connection */
-        public void cancel() {
-            try {
-                mmSocket.close();
-            } catch (IOException e) { }
-        }
     }
 }

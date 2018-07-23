@@ -14,12 +14,14 @@ import android.view.View;
 
 public class WelcomeActivity extends AppCompatActivity {
 
+    //Called when Activity is Created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
     }
 
+    //Triggered when the logo is touched, opens MainActivity
     public void clickanywhere(View v)
     {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
