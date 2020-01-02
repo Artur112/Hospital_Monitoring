@@ -1,1 +1,1 @@
-Android Application for monitoring and modifying electrical currents in hospital equipment.
+Android Application for monitoring electrical currents in hospital equipment.
